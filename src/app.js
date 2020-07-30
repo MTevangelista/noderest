@@ -23,7 +23,9 @@ const router = express.Router();
         })
 // Load the routes
 const indexRoute = require('./routes/index')
+const ProductRoute = require('./routes/product')
 
 app.use('/', indexRoute)
+app.use('/products', ProductRoute)
 
 module.exports = app;
