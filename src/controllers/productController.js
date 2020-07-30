@@ -1,6 +1,16 @@
 const Product = require('../models/product')
 
-exports.crete = (req, res, next) => {
+exports.getAll = (req, res, next) => {
+    Product.find({ active: true }, 'title price slug')
+        .then(product => {
+            res.status(200).send(product)
+        })
+        .catch(err => {
+            res.status(400).send(err)
+        })
+}
+
+exports.create = (req, res, next) => {
     const { title, slug, description, price, active, tags } = req.body
 
     Product.findOne({ slug })
