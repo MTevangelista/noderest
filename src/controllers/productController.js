@@ -10,6 +10,22 @@ exports.getAll = (req, res, next) => {
         })
 }
 
+exports.getBySlug = (req, res, next) => {
+    const { slug } = req.params
+
+    Product.findOne({ active: true, slug}, 'title description price slug tags')
+        .then(product => {
+            if (product) {
+                res.status(200).send(product)
+            } else {
+                res.status(404).send({ message: 'Product not found' })
+            }
+        })
+        .catch(err => {
+            res.status(400).send(err)
+        })
+} 
+
 exports.create = (req, res, next) => {
     const { title, slug, description, price, active, tags } = req.body
 
