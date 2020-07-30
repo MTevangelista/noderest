@@ -26,6 +26,18 @@ exports.getBySlug = (req, res, next) => {
         })
 } 
 
+exports.getById = (req, res, next) => {
+    const { _id } = req.params
+
+    Product.findById({ _id })
+        .then(product => {
+            res.status(200).send(product)
+        })
+        .catch(err => {
+            res.status(400).send({ message: 'Product not found' })
+        })
+} 
+
 exports.create = (req, res, next) => {
     const { title, slug, description, price, active, tags } = req.body
 
