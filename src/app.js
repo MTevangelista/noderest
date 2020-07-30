@@ -21,7 +21,7 @@ const router = express.Router();
         }).catch((err) => {
             console.log(`Connection error: ${err}`);
         })
-//  Routes
+// Load the routes
 const indexRoute = require('./routes/index')
 
 app.use('/', indexRoute)
