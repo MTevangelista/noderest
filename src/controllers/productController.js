@@ -38,6 +38,18 @@ exports.getById = (req, res, next) => {
         })
 } 
 
+exports.getByTag = (req, res, next) => {
+    const { tag } = req.params
+
+    Product.find({ active: true, tags: tag}, 'title description price slug tags')
+        .then(product => {
+            res.status(200).send(product)
+        })
+        .catch(err => {
+            res.status(400).send(err)
+        })
+} 
+
 exports.create = (req, res, next) => {
     const { title, slug, description, price, active, tags } = req.body
 
