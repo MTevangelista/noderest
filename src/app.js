@@ -13,6 +13,7 @@ const router = express.Router();
         app.use(bodyParser.urlencoded({ extended: false }))
     // Mongo
         mongoose.connect(process.env.MONGO_URL, {
+            useFindAndModify: false,
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true

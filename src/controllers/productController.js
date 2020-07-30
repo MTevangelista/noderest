@@ -83,3 +83,26 @@ exports.create = (req, res, next) => {
             data : err
         }))
 }
+
+exports.put = (req, res, next) => {
+    const { _id } = req.params
+    const { title, description, slug, price } = req.body
+
+    Product.findByIdAndUpdate({ _id }, {
+        $set : {
+            title,
+            description,
+            slug,
+            price
+        }
+    }).then(product => {
+        res.status(201).send({
+            message: 'Successfully updated product'
+        })
+    }).catch(err => {
+        res.status(400).send({
+            message: 'Product update failure',
+            data: err
+        })
+    })
+}
