@@ -1,8 +1,9 @@
 const Product = require('../models/product')
 const ValidationContract = require('../validators/fluentValidator')
+const repository = require('../repositories/productRepository')
 
 exports.getAll = (req, res, next) => {
-    Product.find({ active: true }, 'title price slug')
+    repository.getAll()
         .then(product => {
             res.status(200).send(product)
         })
@@ -14,7 +15,7 @@ exports.getAll = (req, res, next) => {
 exports.getBySlug = (req, res, next) => {
     const { slug } = req.params
 
-    Product.findOne({ active: true, slug }, 'title description price slug tags')
+    repository.getBySlug(slug)
         .then(product => {
             if (product) {
                 res.status(200).send(product)
@@ -30,7 +31,7 @@ exports.getBySlug = (req, res, next) => {
 exports.getById = (req, res, next) => {
     const { _id } = req.params
 
-    Product.findById({ _id })
+    repository.getById(_id)
         .then(product => {
             res.status(200).send(product)
         })
@@ -42,7 +43,7 @@ exports.getById = (req, res, next) => {
 exports.getByTag = (req, res, next) => {
     const { tag } = req.params
 
-    Product.find({ active: true, tags: tag }, 'title description price slug tags')
+    repository.getByTag(tag)
         .then(product => {
             res.status(200).send(product)
         })
@@ -64,27 +65,31 @@ exports.create = (req, res, next) => {
         return
     }
 
-    Product.findOne({ slug })
+    const newProduct = {
+        title, 
+        slug, 
+        description, 
+        price, 
+        active, 
+        tags
+    }
+
+    repository.verifyIfProductExistsBySlug(slug)
         .then(product => {
             if (!product) {
-                Product.create({
-                    title,
-                    slug,
-                    description,
-                    price,
-                    active,
-                    tags
-                }).then(product => {
-                    res.status(201).send({
-                        message: 'Successfully registered product!',
-                        product
+                repository.create(newProduct)
+                    .then(product => {
+                        res.status(201).send({
+                            message: 'Successfully registered product!',
+                            product
+                        })
                     })
-                }).catch(err => {
-                    res.status(400).send({
-                        message: 'Product registration failure!',
-                        data: err
+                    .catch(err => {
+                        res.status(400).send({
+                            message: 'Product registration failure!',
+                            data: err
+                        })
                     })
-                })
             } else {
                 res.status(400).send({ error: 'Product already exists' })
             }
@@ -99,39 +104,43 @@ exports.put = (req, res, next) => {
     const { _id } = req.params
     const { title, description, slug, price } = req.body
 
-    Product.findByIdAndUpdate({ _id }, {
-        $set: {
-            title,
-            description,
-            slug,
-            price
-        }
-    }).then(product => {
-        res.status(201).send({
-            message: 'Successfully updated product'
+    const product = {
+        title,
+        description,
+        slug,
+        price
+    }
+
+    repository.update(_id, product)
+        .then(() => {
+            res.status(201).send({
+                message: 'Successfully updated product'
+            })
+        }).catch(err => {
+            res.status(400).send({
+                message: 'Product update failure',
+                data: err
+            })
         })
-    }).catch(err => {
-        res.status(400).send({
-            message: 'Product update failure',
-            data: err
-        })
-    })
 }
 
 exports.delete = (req, res, next) => {
     const { _id } = req.params
 
-    Product.findById({ _id })
+    repository.verifyIfProductExistsById(_id)
         .then(product => {
-            if (product){
-                Product.findOneAndRemove({ _id })
+            if (product) {
+                repository.delete(_id)
                     .then(() => {
                         res.status(201).send({
                             message: 'Successfully deleted product'
                         })
                     })
                     .catch(err => {
-                        res.status(400).send(err)
+                        res.status(400).send({
+                            message: 'Product delete failure',
+                            data: err
+                        })
                     })
             } else {
                 res.status(404).send({
@@ -139,10 +148,8 @@ exports.delete = (req, res, next) => {
                 })
             }
         })
-        .catch(err => {
-            res.status(400).send({
-                message: 'Product delete failure',
-                data: err
-            })
-        })
+        .catch(err => ({
+            message: 'Something wrong happened',
+            data: err
+        }))
 }
