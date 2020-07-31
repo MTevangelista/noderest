@@ -1,35 +1,40 @@
 const Product = require('../models/product')
 
-exports.getAll = () => {
-    return Product.find({
+exports.getAll = async() => {
+    const res = await Product.find({
         active: true
     }, 'title price slug')
+    return res
 }
 
-exports.getBySlug = (slug) => {
-    return Product.findOne({
-        active: true,
-        slug
-    }, 'title description price slug tags')
+exports.getBySlug = async(slug) => {
+    const res = await Product
+        .findOne({
+            slug: slug,
+            active: true
+        }, 'title description price slug tags');
+    return res;
 }
 
-exports.getById = (_id) => { 
-    return Product.findById(_id)
+exports.getById = async(_id) => { 
+    const res = await Product.findById(_id)
+    return res
 }
 
-exports.getByTag = (tag) => {
-    return Product.find({ 
+exports.getByTag = async(tag) => {
+    const res = await Product.find({ 
         active: true, tags: tag 
     }, 'title description price slug tags')
+    return res
 }
 
-exports.create = (data) => { 
+exports.create = async(data) => { 
     let product = new Product(data)
-    return product.save()
+    await product.save()
 }
 
-exports.update = (_id, { title, description, slug, price }) => { 
-    return Product.findByIdAndUpdate({ _id }, {
+exports.update = async(_id, { title, description, slug, price }) => { 
+    await Product.findByIdAndUpdate({ _id }, {
         $set: {
             title,
             description,
@@ -39,14 +44,6 @@ exports.update = (_id, { title, description, slug, price }) => {
     })
 }
 
-exports.delete = (slug) => {
-    return Product.findOneAndRemove(slug)
-}
-
-exports.verifyIfProductExistsBySlug = (slug) => {
-    return Product.findOne({ slug })
-}
-
-exports.verifyIfProductExistsById = (_id) => {
-    return Product.findById(_id)
+exports.delete = async(id) => {
+    await Product.findOneAndRemove(id);
 }

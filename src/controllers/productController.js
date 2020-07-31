@@ -2,57 +2,58 @@ const Product = require('../models/product')
 const ValidationContract = require('../validators/fluentValidator')
 const repository = require('../repositories/productRepository')
 
-exports.getAll = (req, res, next) => {
-    repository.getAll()
-        .then(product => {
-            res.status(200).send(product)
+
+exports.getAll = async(req, res, next) => {
+    try {
+        let data = await repository.getAll()
+        res.status(200).send(data)
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
         })
-        .catch(err => {
-            res.status(400).send(err)
-        })
+    }
 }
 
-exports.getBySlug = (req, res, next) => {
+exports.getBySlug = async(req, res, next) => {
     const { slug } = req.params
 
-    repository.getBySlug(slug)
-        .then(product => {
-            if (product) {
-                res.status(200).send(product)
-            } else {
-                res.status(404).send({ message: 'Product not found' })
-            }
+    try {
+        let data = await repository.getBySlug(slug)
+        res.status(200).send(data)
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
         })
-        .catch(err => {
-            res.status(400).send(err)
-        })
+    }
 }
 
-exports.getById = (req, res, next) => {
+exports.getById = async(req, res, next) => {
     const { _id } = req.params
 
-    repository.getById(_id)
-        .then(product => {
-            res.status(200).send(product)
+    try {
+        let data = await repository.getById(_id)
+        res.status(200).send(data)
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
         })
-        .catch(err => {
-            res.status(400).send({ message: 'Product not found' })
-        })
+    }
 }
 
-exports.getByTag = (req, res, next) => {
+exports.getByTag = async(req, res, next) => {
     const { tag } = req.params
 
-    repository.getByTag(tag)
-        .then(product => {
-            res.status(200).send(product)
+    try {
+        let data = await repository.getByTag(tag)
+        res.status(200).send(data)
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
         })
-        .catch(err => {
-            res.status(400).send(err)
-        })
+    }
 }
 
-exports.create = (req, res, next) => {
+exports.create = async(req, res, next) => {
     const { title, slug, description, price, active, tags } = req.body
     
     let contract = new ValidationContract()
@@ -74,33 +75,17 @@ exports.create = (req, res, next) => {
         tags
     }
 
-    repository.verifyIfProductExistsBySlug(slug)
-        .then(product => {
-            if (!product) {
-                repository.create(newProduct)
-                    .then(product => {
-                        res.status(201).send({
-                            message: 'Successfully registered product!',
-                            product
-                        })
-                    })
-                    .catch(err => {
-                        res.status(400).send({
-                            message: 'Product registration failure!',
-                            data: err
-                        })
-                    })
-            } else {
-                res.status(400).send({ error: 'Product already exists' })
-            }
+    try {
+        await repository.create(newProduct)
+        res.status(201).send({ message: 'Successfully registered product!' })
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
         })
-        .catch(err => ({
-            message: 'Something wrong happened',
-            data: err
-        }))
+    }
 }
 
-exports.put = (req, res, next) => {
+exports.put = async(req, res, next) => {
     const { _id } = req.params
     const { title, description, slug, price } = req.body
 
@@ -111,45 +96,25 @@ exports.put = (req, res, next) => {
         price
     }
 
-    repository.update(_id, product)
-        .then(() => {
-            res.status(201).send({
-                message: 'Successfully updated product'
-            })
-        }).catch(err => {
-            res.status(400).send({
-                message: 'Product update failure',
-                data: err
-            })
+    try {
+        await repository.update(_id, product)
+        res.status(201).send({ message: 'Successfully updated product!' })
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
         })
+    }
 }
 
-exports.delete = (req, res, next) => {
+exports.delete = async(req, res, next) => {
     const { _id } = req.params
 
-    repository.verifyIfProductExistsById(_id)
-        .then(product => {
-            if (product) {
-                repository.delete(_id)
-                    .then(() => {
-                        res.status(201).send({
-                            message: 'Successfully deleted product'
-                        })
-                    })
-                    .catch(err => {
-                        res.status(400).send({
-                            message: 'Product delete failure',
-                            data: err
-                        })
-                    })
-            } else {
-                res.status(404).send({
-                    message: 'Product not found',
-                })
-            }
-        })
-        .catch(err => ({
-            message: 'Something wrong happened',
-            data: err
-        }))
+    try {
+        await repository.delete(_id)
+        res.status(201).send({ message: 'Successfully deleted product!' })
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
+        });
+    }
 }
