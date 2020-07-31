@@ -1,4 +1,5 @@
 const Product = require('../models/product')
+const ValidationContract = require('../validators/fluentValidator')
 
 exports.getAll = (req, res, next) => {
     Product.find({ active: true }, 'title price slug')
@@ -52,6 +53,16 @@ exports.getByTag = (req, res, next) => {
 
 exports.create = (req, res, next) => {
     const { title, slug, description, price, active, tags } = req.body
+    
+    let contract = new ValidationContract()
+    contract.hasMinLen(title, 3, 'The title must contain at least 3 characters')
+    contract.hasMinLen(slug, 3, 'The slug must contain at least 3 characters')
+    contract.hasMinLen(description, 3, 'The description must contain at least 3 characters')
+
+    if (!contract.isValid()) {
+        res.status(400).send(contract.errors()).end()
+        return
+    }
 
     Product.findOne({ slug })
         .then(product => {
