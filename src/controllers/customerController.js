@@ -1,5 +1,8 @@
+require("dotenv").config()
+
 const ValidationContract = require('../validators/fluentValidator')
 const repository = require('../repositories/customerRepository')
+const md5 = require('md5')
 
 exports.getAll = async(req, res, next) => {
     try {
@@ -28,7 +31,7 @@ exports.create = async(req, res, next) => {
     const newCustomer = {
         name,
         email,
-        password
+        password: md5(password + process.env.SALT_KEY)
     }
 
     try {
