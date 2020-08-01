@@ -2,6 +2,17 @@ const ValidationContract = require('../validators/fluentValidator')
 const repository = require('../repositories/orderRepository')
 const guid = require('guid')
 
+exports.getAll = async(req, res, next) => {
+    try {
+        let data = await repository.getAll()
+        res.status(200).send(data)
+    } catch (e) {
+        res.status(500).send({
+            message: 'Failure to process your request'
+        })
+    }
+}
+
 exports.create = async(req, res, next) => {
     const { customer, number, items } = req.body
 
